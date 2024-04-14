@@ -11,7 +11,7 @@ export default function LandingLayout({
   return (
     <div className='h-full'>
       <Navbar />
-      <main className='py-20'>{children}</main>
+      <main className='pt-20 pb-60'>{children}</main>
       <Footer />
     </div>
   );

@@ -17,8 +17,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang='en'>
-      <body className={fontSans.className}>
+    <html lang='en' suppressHydrationWarning>
+      <body className={fontSans.className} suppressHydrationWarning>
         <ThemeProvider
           attribute='class'
           defaultTheme='system'

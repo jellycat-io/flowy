@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 
 export function Footer() {
   return (
-    <nav className='w-full p-4 border-t bg-secondary'>
+    <footer className='fixed bottom-0 w-full p-4 border-t bg-secondary'>
       <div className='md:max-w-screen-2xl mx-auto flex flex-col items-cemter w-full justify-between'>
         <div className='flex justify-between items-center w-full'>
           <div className='flex items-center space-x-2 mb-2'>
@@ -28,6 +28,6 @@ export function Footer() {
           </Button>
         </div>
       </div>
-    </nav>
+    </footer>
   );
 }
