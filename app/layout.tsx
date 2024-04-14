@@ -1,14 +1,18 @@
 import type { Metadata } from 'next';
 import { Quicksand } from 'next/font/google';
-
 import './globals.css';
+import { SessionProvider } from 'next-auth/react';
+
 import { ThemeProvider } from '@/components/theme/theme-provider';
 
 const fontSans = Quicksand({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: 'Flowy',
-  description: 'A project board that helps you organize your work.',
+  title: {
+    default: 'Flowy',
+    template: `%s | Flowy`,
+  },
+  description: 'With Flowy, where tasks flow, ideas grow.',
 };
 
 export default function RootLayout({
@@ -17,17 +21,19 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang='en' suppressHydrationWarning>
-      <body className={fontSans.className} suppressHydrationWarning>
-        <ThemeProvider
-          attribute='class'
-          defaultTheme='system'
-          enableSystem
-          disableTransitionOnChange
-        >
-          {children}
-        </ThemeProvider>
-      </body>
-    </html>
+    <SessionProvider>
+      <html lang='en' suppressHydrationWarning>
+        <body className={fontSans.className} suppressHydrationWarning>
+          <ThemeProvider
+            attribute='class'
+            defaultTheme='system'
+            enableSystem
+            disableTransitionOnChange
+          >
+            {children}
+          </ThemeProvider>
+        </body>
+      </html>
+    </SessionProvider>
   );
 }

@@ -5,6 +5,7 @@ import Link from 'next/link';
 
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import { Routes } from '@/routes';
 
 import LogoFull from '../../public/flowy-logo-full.svg';
 
@@ -38,7 +39,7 @@ export default function LandingPage() {
         accomplish it all with Flowy.
       </h2>
       <Button size='lg' asChild>
-        <Link href='/signup'>
+        <Link href={Routes.auth.register}>
           <Rocket className='w-4 h-4 mr-2' />
           Get Flowy for free
         </Link>

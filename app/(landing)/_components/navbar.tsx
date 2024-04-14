@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { Logo } from '@/components/logo';
 import { ThemeToggle } from '@/components/theme/theme-toggle';
 import { Button } from '@/components/ui/button';
+import { Routes } from '@/routes';
 
 export function Navbar() {
   return (
@@ -12,7 +13,7 @@ export function Navbar() {
         <Logo isFull withLabel hideOnMobile />
         <div className='flex space-x-4 md:w-auto items-center justify-between w-full'>
           <Button size='sm' asChild>
-            <Link href='/sign-in'>
+            <Link href={Routes.auth.login}>
               <DoorOpen className='w-4 h-4 mr-2' />
               Sign in
             </Link>
