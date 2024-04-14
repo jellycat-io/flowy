@@ -7,7 +7,6 @@ const resend = new Resend(process.env.RESEND_API_KEY);
 const domain = process.env.NEXT_PUBLIC_APP_URL;
 
 export async function sendVerificationEmail(email: string, token: string) {
-  // TODO: Support production URLs
   const confirmLink = `${domain}${Routes.auth.emailVerification}?token=${token}`;
 
   await resend.emails.send({
@@ -19,7 +18,6 @@ export async function sendVerificationEmail(email: string, token: string) {
 }
 
 export async function sendPasswordResetEmail(email: string, token: string) {
-  // TODO: Support production URLs
   const resetLink = `${domain}${Routes.auth.resetPassword}?token=${token}`;
 
   await resend.emails.send({
