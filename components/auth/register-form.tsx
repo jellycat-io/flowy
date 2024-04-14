@@ -31,9 +31,11 @@ export function RegisterForm() {
   const form = useForm<z.infer<typeof RegisterSchema>>({
     resolver: zodResolver(RegisterSchema),
     defaultValues: {
-      name: '',
+      firstname: '',
+      lastname: '',
       email: '',
-      password: '',
+      password: undefined,
+      confirmPassword: undefined,
     },
   });
 
@@ -60,24 +62,44 @@ export function RegisterForm() {
       <Form {...form}>
         <form onSubmit={handleSubmit(onSubmit)} className='space-y-6'>
           <div className='space-y-4'>
-            <FormField
-              control={control}
-              name='name'
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Name</FormLabel>
-                  <FormControl>
-                    <Input
-                      {...field}
-                      placeholder='johndoe'
-                      autoComplete='name'
-                      disabled={isPending}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            <div className='flex justify-between space-x-4'>
+              <FormField
+                control={control}
+                name='firstname'
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>First name</FormLabel>
+                    <FormControl>
+                      <Input
+                        {...field}
+                        placeholder='John'
+                        autoComplete='given-name'
+                        disabled={isPending}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={control}
+                name='lastname'
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Last name</FormLabel>
+                    <FormControl>
+                      <Input
+                        {...field}
+                        placeholder='Doe'
+                        autoComplete='family-name'
+                        disabled={isPending}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
             <FormField
               control={control}
               name='email'
@@ -109,6 +131,24 @@ export function RegisterForm() {
                       type='password'
                       placeholder='********'
                       autoComplete='current-password'
+                      disabled={isPending}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={control}
+              name='confirmPassword'
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Confirm password</FormLabel>
+                  <FormControl>
+                    <Input
+                      {...field}
+                      type='password'
+                      placeholder='********'
                       disabled={isPending}
                     />
                   </FormControl>

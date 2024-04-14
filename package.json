@@ -16,6 +16,7 @@
     "db:push": "pnpx prisma db push",
     "db:dev": "docker compose up",
     "prepare": "husky",
+    "vercel:build": "prisma migrate deploy && next build",
     "postinstall": "prisma generate"
   },
   "dependencies": {

@@ -16,8 +16,8 @@ export function Header({ label }: HeaderProps) {
       <div className='flex items-center gap-4'>
         <Image
           src='/flowy-logo-full.svg'
-          width={64}
-          height={64}
+          width={48}
+          height={48}
           alt='Logo'
           priority
         />

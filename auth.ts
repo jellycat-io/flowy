@@ -66,7 +66,9 @@ export const {
           session.user.role = token.role as UserRole;
         }
 
-        session.user.name = token.name;
+        session.user.firstname = token.firstname as string;
+        session.user.lastname = token.lastname as string;
+        session.user.username = token.username as string;
         session.user.email = token.email as string;
         session.user.isOAuth = token.isOAuth as boolean;
         session.user.isTwoFactorEnabled = token.isTwoFactorEnabled as boolean;
@@ -84,7 +86,9 @@ export const {
       const account = await getAccountByUserId(user.id);
 
       token.isOAuth = !!account;
-      token.name = user.name;
+      token.firstname = user.firstname;
+      token.lastname = user.lastname;
+      token.username = user.username;
       token.email = user.email;
       token.role = user.role;
       token.isTwoFactorEnabled = user.isTwoFactorEnabled;
