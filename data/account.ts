@@ -5,7 +5,8 @@ export async function getAccountByUserId(userId?: string) {
 
   try {
     return await db.account.findFirst({ where: { userId } });
-  } catch {
+  } catch (e) {
+    console.error('Error getting account by user id', e);
     return null;
   }
 }

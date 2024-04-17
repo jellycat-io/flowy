@@ -6,7 +6,8 @@ import * as z from 'zod';
 import { getPasswordResetTokenByToken } from '@/data/password-reset-token';
 import { getUserByEmail } from '@/data/user';
 import { db } from '@/lib/db';
-import { ResetPasswordSchema } from '@/schemas';
+
+import { ResetPasswordSchema } from './schemas';
 
 export async function resetPassword(
   token: string,

@@ -5,7 +5,8 @@ export async function getUserByEmail(email?: string) {
 
   try {
     return await db.user.findUnique({ where: { email } });
-  } catch {
+  } catch (e) {
+    console.error('Error getting user by email', e);
     return null;
   }
 }
@@ -15,7 +16,21 @@ export async function getUserById(id?: string) {
 
   try {
     return await db.user.findUnique({ where: { id } });
-  } catch {
+  } catch (e) {
+    console.error('Error getting user by id', e);
     return null;
+  }
+}
+
+export async function getUserRoles(userId?: string) {
+  if (!userId) return null;
+
+  try {
+    return await db.organizationRole.findMany({
+      where: { userId },
+    });
+  } catch (e) {
+    console.error('Error getting user roles', e);
+    return [];
   }
 }

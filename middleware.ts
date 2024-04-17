@@ -3,10 +3,10 @@ import NextAuth from 'next-auth';
 import authConfig from '@/auth.config';
 
 import {
-  DEFAULT_LOGIN_REDIRECT,
   Routes,
   apiAuthPrefix,
   authRoutes,
+  protectedRoutes,
   publicRoutes,
 } from './routes';
 
@@ -18,12 +18,25 @@ export default auth((req) => {
   const isApiAuthRoute = nextUrl.pathname.startsWith(apiAuthPrefix);
   const isPublicRoute = publicRoutes.includes(nextUrl.pathname);
   const isAuthRoute = authRoutes.includes(nextUrl.pathname);
+  const isProtectedRoute = protectedRoutes.includes(nextUrl.pathname);
 
   if (isApiAuthRoute) return;
 
-  if (isAuthRoute) {
+  if (isAuthRoute || isProtectedRoute) {
     if (isLoggedIn) {
-      return Response.redirect(new URL(DEFAULT_LOGIN_REDIRECT, nextUrl));
+      if (!!req.auth) {
+        try {
+          const redirectUrl = new URL(
+            `${Routes.org}/${req.auth.activeOrg.id}`,
+            nextUrl,
+          );
+          return Response.redirect(redirectUrl);
+        } catch (error) {
+          console.error('Failed to construct redirect URL:', error);
+          // Redirect to a default page or error page
+          return Response.redirect(new URL(Routes.auth.error, nextUrl));
+        }
+      }
     }
 
     return;

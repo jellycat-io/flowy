@@ -6,15 +6,17 @@ import { FaGithub } from 'react-icons/fa';
 import { FcGoogle } from 'react-icons/fc';
 
 import { Button } from '@/components/ui/button';
-import { DEFAULT_LOGIN_REDIRECT } from '@/routes';
+import { useActiveOrg } from '@/hooks/use-active-org';
+import { Routes } from '@/routes';
 
 export function Socials() {
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get('callbackUrl');
+  const orgId = useActiveOrg();
 
   function handleClick(provider: 'google' | 'github') {
     signIn(provider, {
-      callbackUrl: callbackUrl ?? DEFAULT_LOGIN_REDIRECT,
+      callbackUrl: callbackUrl ?? `${Routes.org}/${orgId}`,
     });
   }
 

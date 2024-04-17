@@ -22,7 +22,7 @@ export function UserButton() {
           <Avatar>
             <AvatarImage src={user?.image ?? ''} alt={user?.name ?? ''} />
             <AvatarFallback>
-              {`${user?.firstname.charAt(0)}${user?.lastname.charAt(0)}`.toUpperCase()}
+              {user?.name.charAt(0).toUpperCase()}
             </AvatarFallback>
           </Avatar>
         </Button>

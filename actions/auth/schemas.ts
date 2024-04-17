@@ -9,8 +9,7 @@ export const LoginSchema = z.object({
 
 export const RegisterSchema = z
   .object({
-    firstname: z.string().min(1, { message: 'First name is required' }),
-    lastname: z.string().min(1, { message: 'Last name is required' }),
+    name: z.string().min(1, { message: 'Name is required' }),
     email: z.string().email(),
     password: z
       .string()

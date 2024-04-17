@@ -5,7 +5,8 @@ import * as z from 'zod';
 import { getUserByEmail } from '@/data/user';
 import { sendPasswordResetEmail } from '@/lib/mail';
 import { generatePasswordResetToken } from '@/lib/tokens';
-import { ForgotPasswordSchema } from '@/schemas';
+
+import { ForgotPasswordSchema } from './schemas';
 
 export async function forgotPassword(
   values: z.infer<typeof ForgotPasswordSchema>,

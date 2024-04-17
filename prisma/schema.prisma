@@ -10,21 +10,32 @@ datasource db {
 enum UserRole {
   ADMIN
   USER
+  OWNER
+}
+
+enum InvitationStatus {
+  PENDING
+  ACCEPTED
+  DECLINED
 }
 
 model User {
-  id                    String                 @id @default(cuid())
-  firstname             String
-  lastname              String
+  id                    String                   @id @default(cuid())
+  name                  String
   username              String?
-  email                 String                 @unique
+  email                 String                   @unique
   emailVerified         DateTime?
   image                 String?
   password              String?
-  isTwoFactorEnabled    Boolean                @default(false)
+  isTwoFactorEnabled    Boolean                  @default(false)
   TwoFactorConfirmation TwoFactorConfirmation?
-  role                  UserRole               @default(USER)
+  role                  UserRole                 @default(USER)
   accounts              Account[]
+  defaultOrgId          String?
+  activeOrgId           String?
+  orgRoles              OrganizationRole[]
+  invitationsReceived   OrganizationInvitation[] @relation("invitationsReceived")
+  invitationsSent       OrganizationInvitation[] @relation("invitationsSent")
 }
 
 model Account {
@@ -44,6 +55,41 @@ model Account {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([provider, providerAccountId])
+}
+
+model Organization {
+  id          String                   @id @default(cuid())
+  name        String
+  premium     Boolean                  @default(false)
+  users       OrganizationRole[]
+  invitations OrganizationInvitation[]
+}
+
+model OrganizationRole {
+  id     String   @id @default(cuid())
+  userId String
+  orgId  String
+  role   UserRole @default(USER)
+
+  user User         @relation(fields: [userId], references: [id])
+  org  Organization @relation(fields: [orgId], references: [id])
+
+  @@unique([userId, orgId])
+}
+
+model OrganizationInvitation {
+  id              String           @id @default(cuid())
+  email           String
+  status          InvitationStatus @default(PENDING)
+  orgId           String
+  org             Organization     @relation(fields: [orgId], references: [id])
+  invitedByUserId String
+  targetUserId    String?
+
+  invitedByUser User  @relation(name: "invitationsSent", fields: [invitedByUserId], references: [id])
+  targetUser    User? @relation(name: "invitationsReceived", fields: [targetUserId], references: [id])
+
+  @@unique([email, orgId])
 }
 
 model VerificationToken {
@@ -79,4 +125,13 @@ model TwoFactorConfirmation {
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId])
+}
+
+model InvitationToken {
+  id        String   @id @default(cuid())
+  email     String
+  token     String   @unique
+  expiresAt DateTime
+
+  @@unique([email, token])
 }

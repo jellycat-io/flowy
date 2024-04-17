@@ -5,6 +5,7 @@ import { SessionProvider } from 'next-auth/react';
 
 import { auth } from '@/auth';
 import { ThemeProvider } from '@/components/theme/theme-provider';
+import { Toaster } from '@/components/ui/sonner';
 
 const fontSans = Quicksand({ subsets: ['latin'] });
 
@@ -34,6 +35,7 @@ export default async function RootLayout({
             disableTransitionOnChange
           >
             {children}
+            <Toaster />
           </ThemeProvider>
         </body>
       </html>

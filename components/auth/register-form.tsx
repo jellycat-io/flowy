@@ -6,7 +6,8 @@ import React from 'react';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 
-import { register } from '@/actions/register';
+import { register } from '@/actions/auth/register';
+import { RegisterSchema } from '@/actions/auth/schemas';
 import { CardWrapper } from '@/components/auth/card-wrapper';
 import { FormError } from '@/components/form-error';
 import { FormSuccess } from '@/components/form-success';
@@ -21,7 +22,6 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Routes } from '@/routes';
-import { RegisterSchema } from '@/schemas';
 
 export function RegisterForm() {
   const [error, setError] = React.useState<string | undefined>('');
@@ -31,8 +31,7 @@ export function RegisterForm() {
   const form = useForm<z.infer<typeof RegisterSchema>>({
     resolver: zodResolver(RegisterSchema),
     defaultValues: {
-      firstname: '',
-      lastname: '',
+      name: '',
       email: '',
       password: undefined,
       confirmPassword: undefined,
@@ -57,7 +56,6 @@ export function RegisterForm() {
       headerLabel='Create an account'
       backButtonLabel='Already have an account?'
       backButtonHref={Routes.auth.login}
-      showSocials
     >
       <Form {...form}>
         <form onSubmit={handleSubmit(onSubmit)} className='space-y-6'>
@@ -65,33 +63,15 @@ export function RegisterForm() {
             <div className='flex justify-between space-x-4'>
               <FormField
                 control={control}
-                name='firstname'
+                name='name'
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>First name</FormLabel>
+                    <FormLabel>Name</FormLabel>
                     <FormControl>
                       <Input
                         {...field}
                         placeholder='John'
-                        autoComplete='given-name'
-                        disabled={isPending}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={control}
-                name='lastname'
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Last name</FormLabel>
-                    <FormControl>
-                      <Input
-                        {...field}
-                        placeholder='Doe'
-                        autoComplete='family-name'
+                        autoComplete='name'
                         disabled={isPending}
                       />
                     </FormControl>

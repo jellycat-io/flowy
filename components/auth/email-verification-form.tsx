@@ -4,7 +4,7 @@ import { LoaderCircle } from 'lucide-react';
 import { useSearchParams } from 'next/navigation';
 import React from 'react';
 
-import { emailVerification } from '@/actions/email-verification';
+import { emailVerification } from '@/actions/auth/email-verification';
 import { CardWrapper } from '@/components/auth/card-wrapper';
 import { FormError } from '@/components/form-error';
 import { FormSuccess } from '@/components/form-success';
