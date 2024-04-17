@@ -5,11 +5,10 @@ import NextAuth from 'next-auth';
 import authConfig from '@/auth.config';
 
 import { getAccountByUserId } from './data/account';
-import { getOrgById, getOrgRole, getOrgsByUserId } from './data/org';
+import { getOrgRole } from './data/org';
 import { getTwoFactorConfirmationByUserId } from './data/two-factor-confirmation';
 import { getUserById } from './data/user';
 import { db } from './lib/db';
-import { Routes } from './routes';
 
 export const {
   handlers: { GET, POST },
@@ -18,11 +17,6 @@ export const {
   signOut,
 } = NextAuth({
   adapter: PrismaAdapter(db),
-  session: { strategy: 'jwt' },
-  pages: {
-    signIn: Routes.auth.login,
-    error: Routes.auth.error,
-  },
   events: {
     async linkAccount({ user }) {
       if (!user.id) return;
@@ -97,20 +91,11 @@ export const {
           session.user.id,
         );
 
-        const activeOrg = await getOrgById(token.activeOrgId as string);
-
-        if (activeOrg && orgRole) {
-          session.activeOrg = {
-            id: activeOrg.id,
-            name: activeOrg.name,
-            premium: activeOrg.premium,
-          };
-          session.user.role = orgRole.role as UserRole;
-        }
-
+        session.user.role = orgRole?.role as UserRole;
         session.user.name = token.name as string;
         session.user.username = token.username as string;
         session.user.email = token.email as string;
+        session.user.activeOrgId = token.activeOrgId as string;
         session.user.isOAuth = token.isOAuth as boolean;
         session.user.isTwoFactorEnabled = token.isTwoFactorEnabled as boolean;
       }

@@ -1,4 +1,4 @@
-import type { OrganizationRole, UserRole } from '@prisma/client';
+import type { UserRole } from '@prisma/client';
 import type { DefaultSession } from 'next-auth';
 
 export type Org = {
@@ -11,6 +11,7 @@ export type ExtendedUser = DefaultSession['user'] & {
   name: string;
   username?: string;
   role: UserRole;
+  activeOrgId: string;
   isTwoFactorEnabled: boolean;
   isOAuth: boolean;
 };

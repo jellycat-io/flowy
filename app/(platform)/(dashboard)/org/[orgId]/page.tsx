@@ -33,8 +33,6 @@ export default function DashboardPage({
       </RoleGate>
       <p>{org?.name}</p>
       <p>Premium: {org?.premium ? 'true' : 'false'}</p>
-      <UserButton />
-      <OrgSwitcher />
     </div>
   );
 }

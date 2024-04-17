@@ -3,7 +3,6 @@
 import { Building, LoaderCircle } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
-import React from 'react';
 import { toast } from 'sonner';
 
 import { getUserOrgs } from '@/actions/org/get-user-orgs';
@@ -16,12 +15,10 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { useAction } from '@/hooks/use-action';
-import { useActiveOrg } from '@/hooks/use-active-org';
 import { useFetch } from '@/hooks/use-fetch';
 
 export function OrgSwitcher() {
   const session = useSession();
-  const activeOrg = useActiveOrg();
   const router = useRouter();
 
   const { execute } = useAction(setActiveOrg, {
@@ -44,7 +41,10 @@ export function OrgSwitcher() {
   };
 
   return (
-    <Select defaultValue={activeOrg?.id} onValueChange={onOrgChange}>
+    <Select
+      defaultValue={session.data?.user?.activeOrgId}
+      onValueChange={onOrgChange}
+    >
       <SelectTrigger>
         <div className='flex gap-x-2 items-center'>
           <Building className='h-4 w-4' />
