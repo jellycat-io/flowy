@@ -18,7 +18,12 @@ export function UserButton() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant='secondary' className='p-0 rounded-full'>
+        <Button
+          size='iconSm'
+          variant='secondary'
+          className='rounded-full cursor-pointer'
+          asChild
+        >
           <Avatar>
             <AvatarImage src={user?.image ?? ''} alt={user?.name ?? ''} />
             <AvatarFallback>

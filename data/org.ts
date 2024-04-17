@@ -14,6 +14,19 @@ export async function getOrgById(orgId?: string) {
   }
 }
 
+export async function getOrgByName(name?: string) {
+  if (!name) return null;
+
+  try {
+    return await db.organization.findFirst({
+      where: { name },
+    });
+  } catch (e) {
+    console.error('Error getting org by name', e);
+    return null;
+  }
+}
+
 export async function getOrgRole(orgId: string, userId: string) {
   try {
     return await db.organizationRole.findFirst({
