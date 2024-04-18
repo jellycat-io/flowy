@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { Quicksand } from 'next/font/google';
+import { Nunito, Open_Sans, Quicksand } from 'next/font/google';
 import './globals.css';
 import { SessionProvider } from 'next-auth/react';
 
@@ -7,7 +7,7 @@ import { auth } from '@/auth';
 import { ThemeProvider } from '@/components/theme/theme-provider';
 import { Toaster } from '@/components/ui/sonner';
 
-const fontSans = Quicksand({ subsets: ['latin'] });
+const fontSans = Open_Sans({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
   title: {

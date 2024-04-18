@@ -19,12 +19,11 @@ export function Navbar() {
         </Button>
       </div>
       <div className='hidden md:flex flex-1 justify-center'>
-        <Logo isFull />
+        <Logo isFull withLabel />
       </div>
       <div className='flex flex-1 items-center justify-end gap-x-4'>
         <OrgSwitcher />
         <UserButton />
-        <ThemeToggle />
       </div>
     </nav>
   );
