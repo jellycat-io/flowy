@@ -6,6 +6,7 @@ import { toast } from 'sonner';
 import { z } from 'zod';
 
 import { getUserOrgRoles } from '@/actions/org/get-user-org-roles';
+import { deleteAccountAction } from '@/actions/settings/delete-account';
 import { UpdateAccountSchema } from '@/actions/settings/schemas';
 import { updateAccount } from '@/actions/settings/update-account';
 import { Button } from '@/components/ui/button';
@@ -19,6 +20,7 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
+import { Skeleton } from '@/components/ui/skeleton';
 import { Switch } from '@/components/ui/switch';
 import { useAction } from '@/hooks/use-action';
 import { useFetch } from '@/hooks/use-fetch';
@@ -42,6 +44,17 @@ export function AccountForm({ user, onUpdateSuccess }: AccountFormProps) {
 
   const { control, formState, handleSubmit, reset } = form;
 
+  React.useEffect(() => {
+    if (user) {
+      reset({
+        password: '',
+        newPassword: '',
+        confirmNewPassword: '',
+        isTwoFactorEnabled: user.isTwoFactorEnabled,
+      });
+    }
+  }, [user, reset]);
+
   const { execute: sendAccount, loading: sendingAccount } = useAction(
     updateAccount,
     {
@@ -55,24 +68,27 @@ export function AccountForm({ user, onUpdateSuccess }: AccountFormProps) {
     },
   );
 
-  React.useEffect(() => {
-    if (user) {
-      reset({
-        password: '',
-        newPassword: '',
-        confirmNewPassword: '',
-        isTwoFactorEnabled: user.isTwoFactorEnabled,
+  const { execute: deleteAccount, loading: deletingAccount } =
+    useAction(deleteAccountAction);
+
+  function onSubmit(values: z.infer<typeof UpdateAccountSchema>) {
+    sendAccount(values);
+  }
+
+  function onDeleteAccount() {
+    if (user.id) {
+      deleteAccount({
+        userId: user.id,
       });
     }
-  }, [user, reset]);
+  }
 
-  const onSubmit = (values: z.infer<typeof UpdateAccountSchema>) => {
-    sendAccount(values);
-  };
-
-  const { data: userOrgRoles } = useFetch(getUserOrgRoles, {
-    userId: user.id!,
-  });
+  const { data: userOrgRoles, loading: loadingUserOrgRoles } = useFetch(
+    getUserOrgRoles,
+    {
+      userId: user.id!,
+    },
+  );
 
   const ownerOrgsNames = userOrgRoles
     ?.filter((role) => role.role === 'OWNER')
@@ -84,30 +100,13 @@ export function AccountForm({ user, onUpdateSuccess }: AccountFormProps) {
         <form onSubmit={handleSubmit(onSubmit)} className='space-y-6'>
           {!user.isOAuth && (
             <>
-              <FormField
-                name='password'
-                control={control}
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Current password</FormLabel>
-                    <FormControl>
-                      <Input
-                        {...field}
-                        type='password'
-                        disabled={sendingAccount}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <div className='grid grid-cols-2 gap-x-4'>
+              <div className='p-4 border rounded-sm space-y-4'>
                 <FormField
-                  name='newPassword'
+                  name='password'
                   control={control}
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>New password</FormLabel>
+                      <FormLabel>Current password</FormLabel>
                       <FormControl>
                         <Input
                           {...field}
@@ -119,23 +118,42 @@ export function AccountForm({ user, onUpdateSuccess }: AccountFormProps) {
                     </FormItem>
                   )}
                 />
-                <FormField
-                  name='confirmNewPassword'
-                  control={control}
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Confirm new password</FormLabel>
-                      <FormControl>
-                        <Input
-                          {...field}
-                          type='password'
-                          disabled={sendingAccount}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                <div className='grid grid-cols-2 gap-x-4'>
+                  <FormField
+                    name='newPassword'
+                    control={control}
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>New password</FormLabel>
+                        <FormControl>
+                          <Input
+                            {...field}
+                            type='password'
+                            disabled={sendingAccount}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    name='confirmNewPassword'
+                    control={control}
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Confirm new password</FormLabel>
+                        <FormControl>
+                          <Input
+                            {...field}
+                            type='password'
+                            disabled={sendingAccount}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
               </div>
               <FormField
                 name='isTwoFactorEnabled'
@@ -189,36 +207,56 @@ export function AccountForm({ user, onUpdateSuccess }: AccountFormProps) {
           </div>
         </form>
       </Form>
-      <div>
-        <h2 className='text-xl text-destructive mb-2'>Danger zone</h2>
-        <div className='flex flex-col space-y-4 items-start border border-destructive/50 p-4 rounded-sm'>
-          {ownerOrgsNames?.length ? (
-            <div className='space-y-1.5'>
-              <p>
-                You are the owner of the following organizations:{' '}
-                {ownerOrgsNames.map((name, index) => (
-                  <span key={name}>
-                    <span className='font-medium'>{name}</span>
-                    <span>{index < ownerOrgsNames.length - 1 ? ', ' : ''}</span>
-                  </span>
-                ))}
-                .
-              </p>
-              <p>
-                Please transfer ownership or delete the organization before
-                deleting your account.
-              </p>
-            </div>
-          ) : null}
-          <p>
-            Deleting your account will remove all your data and you will no
-            longer be able to access it.
-          </p>
-          <Button variant='destructive' disabled={!!ownerOrgsNames?.length}>
-            Delete account
-          </Button>
+      {loadingUserOrgRoles ? (
+        <DangerZoneSkeleton />
+      ) : (
+        <div className='text-sm'>
+          <h2 className='text-xl text-destructive mb-2'>Danger zone</h2>
+          <div className='flex flex-col space-y-4 items-start border border-destructive/50 p-4 rounded-sm'>
+            {ownerOrgsNames?.length ? (
+              <div className='space-y-1.5'>
+                <p>
+                  You are the owner of the following organizations:{' '}
+                  {ownerOrgsNames.map((name, index) => (
+                    <span key={name}>
+                      <span className='font-medium'>{name}</span>
+                      <span>
+                        {index < ownerOrgsNames.length - 1 ? ', ' : ''}
+                      </span>
+                    </span>
+                  ))}
+                  .
+                </p>
+                <p>
+                  Please transfer ownership or delete the organization before
+                  deleting your account.
+                </p>
+              </div>
+            ) : null}
+            <p>
+              Deleting your account will remove all your data and you will no
+              longer be able to access it.
+            </p>
+            <Button
+              variant='destructive'
+              disabled={!!ownerOrgsNames?.length}
+              onClick={onDeleteAccount}
+            >
+              {deletingAccount && (
+                <LoaderCircle className='mr-2 h-4 w-4 animate-spin' />
+              )}
+              Delete account
+            </Button>
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }
+
+const DangerZoneSkeleton = () => (
+  <div className='flex flex-col space-y-2'>
+    <Skeleton className='w-[88px] h-[28px]' />
+    <Skeleton className='w-full h-[172px]' />
+  </div>
+);

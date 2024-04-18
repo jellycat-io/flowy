@@ -37,21 +37,25 @@ model User {
   orgRoles              OrganizationRole[]
   invitationsReceived   OrganizationInvitation[] @relation("invitationsReceived")
   invitationsSent       OrganizationInvitation[] @relation("invitationsSent")
+  createdAt             DateTime                 @default(now())
+  updatedAt             DateTime?                @updatedAt
 }
 
 model Account {
-  id                String  @id @default(cuid())
+  id                String    @id @default(cuid())
   userId            String
   type              String
   provider          String
   providerAccountId String
-  refresh_token     String? @db.Text
-  access_token      String? @db.Text
+  refresh_token     String?   @db.Text
+  access_token      String?   @db.Text
   expires_at        Int?
   token_type        String?
   scope             String?
-  id_token          String? @db.Text
+  id_token          String?   @db.Text
   session_state     String?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime? @updatedAt
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -60,17 +64,21 @@ model Account {
 
 model Organization {
   id          String                   @id @default(cuid())
-  name        String                   @unique
+  name        String
   premium     Boolean                  @default(false)
   users       OrganizationRole[]
   invitations OrganizationInvitation[]
+  createdAt   DateTime                 @default(now())
+  updatedAt   DateTime?                @updatedAt
 }
 
 model OrganizationRole {
-  id     String   @id @default(cuid())
-  userId String
-  orgId  String
-  role   UserRole @default(USER)
+  id        String    @id @default(cuid())
+  userId    String
+  orgId     String
+  role      UserRole  @default(USER)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime? @updatedAt
 
   user User         @relation(fields: [userId], references: [id], onDelete: Cascade)
   org  Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
@@ -86,6 +94,8 @@ model OrganizationInvitation {
   org             Organization     @relation(fields: [orgId], references: [id], onDelete: Cascade)
   invitedByUserId String
   targetUserId    String?
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime?        @updatedAt
 
   invitedByUser User  @relation(name: "invitationsSent", fields: [invitedByUserId], references: [id])
   targetUser    User? @relation(name: "invitationsReceived", fields: [targetUserId], references: [id])
@@ -98,6 +108,7 @@ model VerificationToken {
   email     String
   token     String   @unique
   expiresAt DateTime
+  createdAt DateTime @default(now())
 
   @@unique([email, token])
 }
@@ -107,6 +118,7 @@ model PasswordResetToken {
   email     String
   token     String   @unique
   expiresAt DateTime
+  createdAt DateTime @default(now())
 
   @@unique([email, token])
 }
@@ -116,14 +128,16 @@ model TwoFactorToken {
   email     String
   token     String   @unique
   expiresAt DateTime
+  createdAt DateTime @default(now())
 
   @@unique([email, token])
 }
 
 model TwoFactorConfirmation {
-  id     String @id @default(cuid())
-  userId String
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id        String   @id @default(cuid())
+  userId    String
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId])
 }
@@ -133,6 +147,7 @@ model InvitationToken {
   email     String
   token     String   @unique
   expiresAt DateTime
+  createdAt DateTime @default(now())
 
   @@unique([email, token])
 }

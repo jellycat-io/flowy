@@ -45,3 +45,7 @@ export const UpdateAccountSchema = z
       path: ['confirmNewPassword'],
     },
   );
+
+export const DeleteAccountSchema = z.object({
+  userId: z.string(),
+});

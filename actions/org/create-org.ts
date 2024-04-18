@@ -30,12 +30,6 @@ async function handler({
   }
 
   try {
-    const existingOrg = await getOrgByName(name);
-
-    if (existingOrg) {
-      return { error: 'Organization already exists' };
-    }
-
     const org = await db.organization.create({
       data: {
         name,
