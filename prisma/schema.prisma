@@ -72,8 +72,8 @@ model OrganizationRole {
   orgId  String
   role   UserRole @default(USER)
 
-  user User         @relation(fields: [userId], references: [id])
-  org  Organization @relation(fields: [orgId], references: [id])
+  user User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  org  Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
 
   @@unique([userId, orgId])
 }
@@ -83,7 +83,7 @@ model OrganizationInvitation {
   email           String
   status          InvitationStatus @default(PENDING)
   orgId           String
-  org             Organization     @relation(fields: [orgId], references: [id])
+  org             Organization     @relation(fields: [orgId], references: [id], onDelete: Cascade)
   invitedByUserId String
   targetUserId    String?
 

@@ -12,3 +12,7 @@ export const CreateOrgSchema = z.object({
   name: z.string().min(3, 'Name must be at least 3 characters'),
   isActiveOrg: z.boolean().optional(),
 });
+
+export const GetUserOrgRolesSchema = z.object({
+  userId: z.string(),
+});
