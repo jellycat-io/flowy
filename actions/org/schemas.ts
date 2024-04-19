@@ -13,6 +13,6 @@ export const CreateOrgSchema = z.object({
   isActiveOrg: z.boolean().optional(),
 });
 
-export const GetUserOrgRolesSchema = z.object({
+export const GetUserOrgsSchema = z.object({
   userId: z.string(),
 });

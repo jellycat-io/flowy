@@ -5,7 +5,7 @@ import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import { z } from 'zod';
 
-import { getUserOrgRoles } from '@/actions/org/get-user-org-roles';
+import { getUserOrgs } from '@/actions/org/get-user-orgs';
 import { deleteAccountAction } from '@/actions/settings/delete-account';
 import { UpdateAccountSchema } from '@/actions/settings/schemas';
 import { updateAccount } from '@/actions/settings/update-account';
@@ -83,16 +83,13 @@ export function AccountForm({ user, onUpdateSuccess }: AccountFormProps) {
     }
   }
 
-  const { data: userOrgRoles, loading: loadingUserOrgRoles } = useFetch(
-    getUserOrgRoles,
-    {
-      userId: user.id!,
-    },
-  );
+  const { data: userOrgs, loading: loadingUserOrgs } = useFetch(getUserOrgs, {
+    userId: user.id!,
+  });
 
-  const ownerOrgsNames = userOrgRoles
-    ?.filter((role) => role.role === 'OWNER')
-    ?.map((org) => org.org.name);
+  const ownerOrgsNames = userOrgs
+    ?.filter((org) => org.role === 'OWNER')
+    ?.map((org) => org.name);
 
   return (
     <div className='space-y-6'>
@@ -207,7 +204,7 @@ export function AccountForm({ user, onUpdateSuccess }: AccountFormProps) {
           </div>
         </form>
       </Form>
-      {loadingUserOrgRoles ? (
+      {loadingUserOrgs ? (
         <DangerZoneSkeleton />
       ) : (
         <div className='text-sm'>

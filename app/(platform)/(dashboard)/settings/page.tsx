@@ -1,50 +1,50 @@
 'use client';
 
-import { zodResolver } from '@hookform/resolvers/zod';
+import { useSearchParams } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import React from 'react';
-import { useForm } from 'react-hook-form';
-import { toast } from 'sonner';
-import { z } from 'zod';
 
-import { UpdateProfileSchema } from '@/actions/settings/schemas';
-import { updateProfile } from '@/actions/settings/update-profile';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { useAction } from '@/hooks/use-action';
 import { useActiveUser } from '@/hooks/use-active-user';
 
 import { AccountForm } from './_components/account-form';
+import { OrgsManager } from './_components/orgs-manager';
 import { ProfileForm } from './_components/profile-form';
 
 type Tab = {
   id: string;
   title: string;
-  Component: React.ComponentProps<any>;
 };
 
 const tabs: Tab[] = [
   {
     id: 'profile',
     title: 'Profile',
-    Component: ProfileForm,
   },
   {
     id: 'account',
     title: 'Account',
-    Component: AccountForm,
+  },
+  {
+    id: 'orgs',
+    title: 'Organizations',
   },
 ];
 
 export default function SettingsPage() {
   const session = useSession();
   const user = useActiveUser();
+  const params = useSearchParams();
 
   if (!user?.id) {
     throw new Error('Unauthorized');
   }
 
-  const [activeTab, setActiveTab] = React.useState<Tab>(tabs[0]);
+  const initialTab =
+    tabs.find((tab) => tab.id === params.get('tab')) ?? tabs[0];
+
+  const [activeTab, setActiveTab] = React.useState<Tab>(initialTab);
 
   return (
     <div className='p-4 flex flex-col space-y-6'>
@@ -63,8 +63,8 @@ export default function SettingsPage() {
           <p className='text-gray-500'>{user?.email}</p>
         </div>
       </div>
-      <Tabs defaultValue='profile' className='w-full'>
-        <TabsList className={`grid w-full grid-cols-2`}>
+      <Tabs defaultValue={activeTab.id} className='w-full'>
+        <TabsList className={'grid w-full grid-cols-3'}>
           {tabs.map((tab) => (
             <TabsTrigger
               key={tab.id}
@@ -75,11 +75,14 @@ export default function SettingsPage() {
             </TabsTrigger>
           ))}
         </TabsList>
-        <TabsContent value={activeTab.id} className='py-4'>
-          <activeTab.Component
-            user={user}
-            onUpdateSuccess={() => session.update()}
-          />
+        <TabsContent value='profile' className='py-4'>
+          <ProfileForm user={user} onUpdateSuccess={() => session.update()} />
+        </TabsContent>
+        <TabsContent value='account' className='py-4'>
+          <AccountForm user={user} onUpdateSuccess={() => session.update()} />
+        </TabsContent>
+        <TabsContent value='orgs' className='py-4'>
+          <OrgsManager user={user} />
         </TabsContent>
       </Tabs>
     </div>

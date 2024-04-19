@@ -1,5 +1,6 @@
+import { OrganizationRole } from '@prisma/client';
+
 import { db } from '@/lib/db';
-import { Org } from '@/next-auth';
 
 export async function getOrgById(orgId?: string) {
   if (!orgId) return null;
@@ -37,14 +38,41 @@ export async function getOrgRole(orgId: string, userId: string) {
   }
 }
 
-export async function getOrgsByUserId(userId: string): Promise<Org[] | null> {
+export type OrgWithRole = {
+  id: string;
+  name: string;
+  premium: boolean;
+  nUsers: number;
+  role: OrganizationRole['role'];
+};
+
+export async function getOrgsByUserId(
+  userId: string,
+): Promise<OrgWithRole[] | null> {
   try {
-    const role = await db.organizationRole.findMany({
-      where: { userId },
-      include: { org: true },
+    const organizations = await prisma.organizationRole.findMany({
+      where: {
+        userId: userId,
+      },
+      include: {
+        org: {
+          select: {
+            id: true,
+            name: true,
+            premium: true,
+            users: true,
+          },
+        },
+      },
     });
 
-    return role.map((r) => r.org);
+    return organizations.map(({ org, ...role }) => ({
+      id: org.id,
+      name: org.name,
+      premium: org.premium,
+      nUsers: org.users.length,
+      role: role.role,
+    }));
   } catch (e) {
     console.error('Error getting orgs by user id', e);
     return null;

@@ -2,7 +2,6 @@ import { Plus } from 'lucide-react';
 
 import { Logo } from '@/components/logo';
 import { OrgSwitcher } from '@/components/org/org-switcher';
-import { ThemeToggle } from '@/components/theme/theme-toggle';
 import { Button } from '@/components/ui/button';
 import { UserButton } from '@/components/user-button';
 
@@ -19,7 +18,7 @@ export function Navbar() {
         </Button>
       </div>
       <div className='hidden md:flex flex-1 justify-center'>
-        <Logo isFull withLabel />
+        <Logo />
       </div>
       <div className='flex flex-1 items-center justify-end gap-x-4'>
         <OrgSwitcher />

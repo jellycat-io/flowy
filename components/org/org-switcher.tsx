@@ -1,7 +1,7 @@
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Building, Check, LoaderCircle, Plus } from 'lucide-react';
+import { Building, LoaderCircle, Plus } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import React from 'react';
@@ -47,6 +47,10 @@ export function OrgSwitcher() {
   const session = useSession();
   const router = useRouter();
 
+  if (!session.data?.user.id) {
+    throw new Error('Unauthorized');
+  }
+
   const [selectedOrg, setSelectedOrg] = React.useState<string | undefined>(
     session.data?.user.activeOrgId,
   );
@@ -66,7 +70,9 @@ export function OrgSwitcher() {
     data: orgs,
     loading: isLoadingOrgs,
     refresh: refreshOrgs,
-  } = useFetch(getUserOrgs);
+  } = useFetch(getUserOrgs, {
+    userId: session.data?.user.id,
+  });
 
   const { execute: setCurrentOrg } = useAction(setActiveOrg, {
     onError: (error) => {

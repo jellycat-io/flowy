@@ -1,23 +1,22 @@
 'use server';
 
-import { getOrgsByUserId } from '@/data/org';
-import { currentUser } from '@/lib/auth';
+import { z } from 'zod';
+
+import { OrgWithRole, getOrgsByUserId } from '@/data/org';
 import { FetchState, createSafeFetch } from '@/lib/create-safe-fetch';
-import { Org } from '@/next-auth';
 
-type GetUserOrgsResponse = FetchState<Org[]>;
+import { GetUserOrgsSchema } from './schemas';
 
-async function handler(): Promise<GetUserOrgsResponse> {
-  const user = await currentUser();
+export type GetUserOrgsInput = z.infer<typeof GetUserOrgsSchema>;
+export type GetUserOrgsResponse = FetchState<OrgWithRole[]>;
 
-  if (!user?.id) {
-    throw new Error('Unauthorized');
-  }
-
-  const orgs = await getOrgsByUserId(user.id);
+async function handler({
+  userId,
+}: GetUserOrgsInput): Promise<GetUserOrgsResponse> {
+  const orgs = await getOrgsByUserId(userId);
 
   if (!orgs) {
-    throw new Error('Error getting orgs');
+    return { error: 'Organizations not found' };
   }
 
   return { data: orgs };

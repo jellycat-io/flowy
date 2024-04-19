@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { Nunito, Open_Sans, Quicksand } from 'next/font/google';
+import { Open_Sans } from 'next/font/google';
 import './globals.css';
 import { SessionProvider } from 'next-auth/react';
 

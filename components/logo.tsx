@@ -1,13 +1,13 @@
 'use client';
 
-import { Jua } from 'next/font/google';
+import { Lato } from 'next/font/google';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useTheme } from 'next-themes';
 
 import { cn } from '@/lib/utils';
 
-const fontHeading = Jua({ weight: '400', subsets: ['latin'] });
+const fontHeading = Lato({ weight: '700', subsets: ['latin'] });
 
 interface LogoProps {
   isFull?: boolean;
@@ -15,11 +15,7 @@ interface LogoProps {
   hideOnMobile?: boolean;
 }
 
-export function Logo({
-  isFull = false,
-  withLabel = false,
-  hideOnMobile = false,
-}: LogoProps) {
+export function Logo({ withLabel = false, hideOnMobile = false }: LogoProps) {
   const { theme } = useTheme();
   return (
     <Link href='/'>
@@ -30,13 +26,13 @@ export function Logo({
         )}
       >
         <Image
-          src={`/flowy-logo${isFull ? '-full' : ''}${theme === 'dark' ? '-dark' : ''}.svg`}
+          src={`/flowy-logo${theme === 'dark' ? '-dark' : ''}.svg`}
           alt='Flowy'
           width={30}
           height={30}
         />
         {withLabel && (
-          <p className={cn(fontHeading.className, 'text-lg')}>Flowy</p>
+          <p className={cn(fontHeading.className, 'text-xl')}>Flowy</p>
         )}
       </div>
     </Link>
