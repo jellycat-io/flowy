@@ -4,39 +4,32 @@ import { revalidatePath } from 'next/cache';
 import * as z from 'zod';
 
 import { auth } from '@/auth';
-import { getOrgById } from '@/data/org';
-import { getUserRoles } from '@/data/user';
+import { Org, getOrgsByUserId } from '@/data/org';
 import { ActionState, createSafeAction } from '@/lib/create-safe-action';
 import { db } from '@/lib/db';
-import { Org } from '@/next-auth';
 import { Routes } from '@/routes';
 
 import { SetActiveOrgSchema } from './schemas';
 
 type SetActiveOrgInput = z.infer<typeof SetActiveOrgSchema>;
+type SetActiveOrgResponse = Org;
 
 async function handler({
   orgId,
 }: SetActiveOrgInput): Promise<ActionState<SetActiveOrgInput, Org>> {
   const session = await auth();
 
-  if (!session) {
+  if (!session?.user.id) {
     return { error: 'Unauthorized' };
   }
 
   try {
-    const roles = await getUserRoles(session.user.id);
+    const orgs = await getOrgsByUserId(session.user.id);
 
-    const isValidOrg = roles?.some((role) => role.orgId === orgId);
-
-    const org = await getOrgById(orgId);
-
-    if (!isValidOrg) {
-      return { error: 'Invalid organization' };
-    }
+    const org = orgs?.find((org) => org.id === orgId);
 
     if (!org) {
-      return { error: 'Organization not found' };
+      return { error: 'Invalid organization' };
     }
 
     await db.user.update({
@@ -53,4 +46,4 @@ async function handler({
   }
 }
 
-export const setActiveOrg = createSafeAction(SetActiveOrgSchema, handler);
+export const setActiveOrgAction = createSafeAction(SetActiveOrgSchema, handler);

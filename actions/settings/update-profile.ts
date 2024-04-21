@@ -73,4 +73,7 @@ async function handler(
   };
 }
 
-export const updateProfile = createSafeAction(UpdateProfileSchema, handler);
+export const updateProfileAction = createSafeAction(
+  UpdateProfileSchema,
+  handler,
+);

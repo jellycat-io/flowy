@@ -74,4 +74,7 @@ async function handler(
   };
 }
 
-export const updateAccount = createSafeAction(UpdateAccountSchema, handler);
+export const updateAccountAction = createSafeAction(
+  UpdateAccountSchema,
+  handler,
+);

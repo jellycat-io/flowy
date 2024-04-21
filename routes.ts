@@ -36,6 +36,8 @@ export const apiAuthPrefix = '/api/auth';
  */
 export const Routes = {
   org: '/org',
+  orgEdit: '/org/[orgId]/edit',
+  orgInvitation: '/org/invitation',
   landing: '/',
   auth: {
     login: '/auth/login',

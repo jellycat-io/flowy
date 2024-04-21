@@ -2,9 +2,8 @@
 
 import { z } from 'zod';
 
-import { getOrgById } from '@/data/org';
+import { Org, getOrgById } from '@/data/org';
 import { FetchState, createSafeFetch } from '@/lib/create-safe-fetch';
-import { Org } from '@/next-auth';
 
 import { GetOrgSchema } from './schemas';
 

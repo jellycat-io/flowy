@@ -6,10 +6,9 @@ import { getSession } from 'next-auth/react';
 import { z } from 'zod';
 
 import { auth } from '@/auth';
-import { getOrgByName } from '@/data/org';
+import { Org } from '@/data/org';
 import { ActionState, createSafeAction } from '@/lib/create-safe-action';
 import { db } from '@/lib/db';
-import { Org } from '@/next-auth';
 
 import { CreateOrgSchema } from './schemas';
 
@@ -52,7 +51,15 @@ async function handler({
     }
     return {
       data: {
-        org: org,
+        org: {
+          ...org,
+          users: [
+            {
+              userId: session.user.id,
+              role: UserRole.OWNER,
+            },
+          ],
+        },
         setAsActive: !!isActiveOrg,
       },
     };
@@ -62,4 +69,4 @@ async function handler({
   }
 }
 
-export const createOrg = createSafeAction(CreateOrgSchema, handler);
+export const createOrgAction = createSafeAction(CreateOrgSchema, handler);

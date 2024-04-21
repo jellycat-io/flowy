@@ -1,18 +1,23 @@
 'use client';
 
+import { ChevronLeft } from 'lucide-react';
 import { useSession } from 'next-auth/react';
+import React from 'react';
+import { toast } from 'sonner';
 
+import { deleteOrgAction } from '@/actions/org/delete-org';
 import { getOrg } from '@/actions/org/get-org';
 import {
   Breadcrumb,
   BreadcrumbItem,
   BreadcrumbLink,
   BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb';
-import { Skeleton } from '@/components/ui/skeleton';
-import { useFetch } from '@/hooks/use-fetch';
+import { useOrgs } from '@/contexts/org-context';
+import { useAction } from '@/hooks/use-action';
+
+import { MembersManager } from './_components/members-manager';
+import { OrgInfoForm } from './_components/org-info-form';
 
 export default function EditOrgPage({
   params,
@@ -22,14 +27,13 @@ export default function EditOrgPage({
   };
 }) {
   const session = useSession();
+  const { orgs, refreshOrgs, isLoading } = useOrgs();
 
-  const { data: org, loading: loadingOrg } = useFetch(getOrg, {
-    orgId: params.orgId,
-  });
-
-  if (loadingOrg) {
-    return <Skeleton className='w-full h-[82px] m-4' />;
+  if (!session.data?.user.id) {
+    throw new Error('Unauthorized');
   }
+
+  const org = orgs.find((org) => org.id === params.orgId);
 
   return (
     <div className='p-4 text-sm'>
@@ -38,17 +42,26 @@ export default function EditOrgPage({
           <Breadcrumb>
             <BreadcrumbList>
               <BreadcrumbItem>
-                <BreadcrumbLink href='/settings?tab=orgs'>
-                  Organizations
+                <BreadcrumbLink
+                  href='/settings?tab=orgs'
+                  className='flex items-center'
+                >
+                  <ChevronLeft className='mr-2 w-4 h-4' />
+                  Back to organizations
                 </BreadcrumbLink>
-              </BreadcrumbItem>
-              <BreadcrumbSeparator />
-              <BreadcrumbItem>
-                <BreadcrumbPage>{org.name}</BreadcrumbPage>
               </BreadcrumbItem>
             </BreadcrumbList>
           </Breadcrumb>
-          <h1 className='text-xl'>{org.name}</h1>
+
+          <OrgInfoForm
+            org={org}
+            isLoading={isLoading}
+            onSuccess={() => {
+              refreshOrgs();
+              session.update();
+            }}
+          />
+          <MembersManager orgId={params.orgId} />
         </div>
       )}
     </div>

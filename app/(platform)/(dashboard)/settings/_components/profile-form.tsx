@@ -1,14 +1,13 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import { LoaderCircle, Save } from 'lucide-react';
-import { Session } from 'next-auth';
 import React from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import { z } from 'zod';
 
 import { UpdateProfileSchema } from '@/actions/settings/schemas';
-import { updateProfile } from '@/actions/settings/update-profile';
-import { Button } from '@/components/ui/button';
+import { updateProfileAction } from '@/actions/settings/update-profile';
+import { FormCancel } from '@/components/form-cancel';
+import { FormSubmit } from '@/components/form-submit';
 import {
   Form,
   FormControl,
@@ -36,10 +35,10 @@ export function ProfileForm({ user, onUpdateSuccess }: ProfileFormProps) {
     },
   });
 
-  const { control, formState, handleSubmit, reset } = form;
+  const { control, handleSubmit, reset } = form;
 
-  const { execute: sendProfile, loading: sendingProfile } = useAction(
-    updateProfile,
+  const { execute: updateProfile, loading: sendingProfile } = useAction(
+    updateProfileAction,
     {
       onSuccess: async (data) => {
         toast.success(data.success);
@@ -60,9 +59,9 @@ export function ProfileForm({ user, onUpdateSuccess }: ProfileFormProps) {
     }
   }, [user, reset]);
 
-  const onSubmit = (values: z.infer<typeof UpdateProfileSchema>) => {
-    sendProfile(values);
-  };
+  function onSubmit(values: z.infer<typeof UpdateProfileSchema>) {
+    updateProfile(values);
+  }
 
   return (
     <Form {...form}>
@@ -104,30 +103,8 @@ export function ProfileForm({ user, onUpdateSuccess }: ProfileFormProps) {
           />
         )}
         <div className='flex space-x-2 justify-end'>
-          <Button
-            variant='ghost'
-            disabled={
-              !formState.isDirty || !formState.touchedFields || sendingProfile
-            }
-            onClick={() => {
-              reset();
-            }}
-          >
-            Cancel
-          </Button>
-          <Button
-            type='submit'
-            disabled={
-              !formState.isDirty || !formState.touchedFields || sendingProfile
-            }
-          >
-            {sendingProfile ? (
-              <LoaderCircle className='mr-2 h-4 w-4 animate-spin' />
-            ) : (
-              <Save className='mr-2 w-4 h-4' />
-            )}
-            Save
-          </Button>
+          <FormCancel isLoading={sendingProfile} />
+          <FormSubmit isLoading={sendingProfile} />
         </div>
       </form>
     </Form>

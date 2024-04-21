@@ -1,3 +1,5 @@
+import { OrgsProvider } from '@/contexts/org-context';
+
 import { Navbar } from './_components/navbar';
 
 interface DashboardLayoutProps {
@@ -6,9 +8,11 @@ interface DashboardLayoutProps {
 
 export default function DashboardLayout({ children }: DashboardLayoutProps) {
   return (
-    <div className='h-full'>
-      <Navbar />
-      <main className='pt-14'>{children}</main>
-    </div>
+    <OrgsProvider>
+      <div className='h-full'>
+        <Navbar />
+        <main className='pt-14'>{children}</main>
+      </div>
+    </OrgsProvider>
   );
 }

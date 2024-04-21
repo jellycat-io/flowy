@@ -8,7 +8,9 @@ import { z } from 'zod';
 import { getUserOrgs } from '@/actions/org/get-user-orgs';
 import { deleteAccountAction } from '@/actions/settings/delete-account';
 import { UpdateAccountSchema } from '@/actions/settings/schemas';
-import { updateAccount } from '@/actions/settings/update-account';
+import { updateAccountAction } from '@/actions/settings/update-account';
+import { FormCancel } from '@/components/form-cancel';
+import { FormSubmit } from '@/components/form-submit';
 import { Button } from '@/components/ui/button';
 import {
   Form,
@@ -42,7 +44,7 @@ export function AccountForm({ user, onUpdateSuccess }: AccountFormProps) {
     },
   });
 
-  const { control, formState, handleSubmit, reset } = form;
+  const { control, handleSubmit, reset } = form;
 
   React.useEffect(() => {
     if (user) {
@@ -55,8 +57,8 @@ export function AccountForm({ user, onUpdateSuccess }: AccountFormProps) {
     }
   }, [user, reset]);
 
-  const { execute: sendAccount, loading: sendingAccount } = useAction(
-    updateAccount,
+  const { execute: updateAccount, loading: sendingAccount } = useAction(
+    updateAccountAction,
     {
       onError: (error) => {
         toast.error(error);
@@ -72,7 +74,7 @@ export function AccountForm({ user, onUpdateSuccess }: AccountFormProps) {
     useAction(deleteAccountAction);
 
   function onSubmit(values: z.infer<typeof UpdateAccountSchema>) {
-    sendAccount(values);
+    updateAccount(values);
   }
 
   function onDeleteAccount() {
@@ -177,30 +179,8 @@ export function AccountForm({ user, onUpdateSuccess }: AccountFormProps) {
             </>
           )}
           <div className='flex space-x-2 justify-end'>
-            <Button
-              variant='ghost'
-              disabled={
-                !formState.isDirty || !formState.touchedFields || sendingAccount
-              }
-              onClick={() => {
-                reset();
-              }}
-            >
-              Cancel
-            </Button>
-            <Button
-              type='submit'
-              disabled={
-                !formState.isDirty || !formState.touchedFields || sendingAccount
-              }
-            >
-              {sendingAccount ? (
-                <LoaderCircle className='mr-2 h-4 w-4 animate-spin' />
-              ) : (
-                <Save className='mr-2 w-4 h-4' />
-              )}
-              Save
-            </Button>
+            <FormCancel isLoading={sendingAccount} />
+            <FormSubmit isLoading={sendingAccount} />
           </div>
         </form>
       </Form>

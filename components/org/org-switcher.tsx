@@ -2,17 +2,13 @@
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Building, LoaderCircle, Plus } from 'lucide-react';
-import { useRouter } from 'next/navigation';
-import { useSession } from 'next-auth/react';
 import React from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import { z } from 'zod';
 
-import { createOrg } from '@/actions/org/create-org';
-import { getUserOrgs } from '@/actions/org/get-user-orgs';
+import { createOrgAction } from '@/actions/org/create-org';
 import { CreateOrgSchema } from '@/actions/org/schemas';
-import { setActiveOrg } from '@/actions/org/set-active-org';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import {
@@ -40,20 +36,12 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
+import { useOrgs } from '@/contexts/org-context';
 import { useAction } from '@/hooks/use-action';
-import { useFetch } from '@/hooks/use-fetch';
 
 export function OrgSwitcher() {
-  const session = useSession();
-  const router = useRouter();
+  const { activeOrg, setActiveOrg, orgs, refreshOrgs, isLoading } = useOrgs();
 
-  if (!session.data?.user.id) {
-    throw new Error('Unauthorized');
-  }
-
-  const [selectedOrg, setSelectedOrg] = React.useState<string | undefined>(
-    session.data?.user.activeOrgId,
-  );
   const [showCreateDialog, setShowCreateDialog] = React.useState(false);
 
   const form = useForm<z.infer<typeof CreateOrgSchema>>({
@@ -66,53 +54,33 @@ export function OrgSwitcher() {
 
   const { control, formState, handleSubmit, reset } = form;
 
-  const {
-    data: orgs,
-    loading: isLoadingOrgs,
-    refresh: refreshOrgs,
-  } = useFetch(getUserOrgs, {
-    userId: session.data?.user.id,
-  });
+  const { execute: createOrg, loading: isCreateLoading } = useAction(
+    createOrgAction,
+    {
+      onError: (error) => {
+        toast.error(error);
+      },
+      onSuccess: async ({ org, setAsActive }) => {
+        toast.success(`${org.name} created successfully!`);
+        setShowCreateDialog(false);
 
-  const { execute: setCurrentOrg } = useAction(setActiveOrg, {
-    onError: (error) => {
-      toast.error(error);
-    },
-    onSuccess: async (org) => {
-      toast.success(`Switched to ${org.name}`);
-      await session.update();
-      router.push(`/org/${org.id}`);
-    },
-  });
+        await refreshOrgs();
 
-  const { execute: sendOrg, loading: isCreateLoading } = useAction(createOrg, {
-    onError: (error) => {
-      toast.error(error);
+        if (setAsActive) {
+          setActiveOrg(org.id);
+        }
+      },
     },
-    onSuccess: async ({ org, setAsActive }) => {
-      toast.success(`${org.name} created successfully!`);
-      setShowCreateDialog(false);
-
-      await refreshOrgs();
-
-      if (setAsActive) {
-        await session.update();
-        setSelectedOrg(org.id);
-        router.push(`/org/${org.id}`);
-      }
-    },
-  });
+  );
 
   const onOrgChange = (orgId: string) => {
-    if (selectedOrg === orgId) return;
+    if (activeOrg?.id === orgId) return;
 
-    console.log('change');
-    setCurrentOrg({ orgId });
-    setSelectedOrg(orgId);
+    setActiveOrg(orgId);
   };
 
   const onCreateOrg = (values: z.infer<typeof CreateOrgSchema>) => {
-    sendOrg(values);
+    createOrg(values);
   };
 
   return (
@@ -121,11 +89,11 @@ export function OrgSwitcher() {
         <DropdownMenuTrigger asChild>
           <Button size='sm' variant='outline'>
             <Building className='mr-2 h-4 w-4' />
-            {isLoadingOrgs ? (
+            {isLoading ? (
               <LoaderCircle className='h-4 w-4 animate-spin text-muted-foreground' />
             ) : (
               <span className='shrink-0 text-ellipsis overflow-hidden w-24'>
-                {orgs?.find((org) => org.id === selectedOrg)?.name}
+                {orgs?.find((org) => org.id === activeOrg?.id)?.name}
               </span>
             )}
           </Button>
@@ -134,7 +102,7 @@ export function OrgSwitcher() {
           {orgs?.map((org) => (
             <DropdownMenuCheckboxItem
               key={org.id}
-              checked={org.id === selectedOrg}
+              checked={org.id === activeOrg?.id}
               onCheckedChange={(checked) => !!checked && onOrgChange(org.id)}
             >
               <span>{org.name}</span>
