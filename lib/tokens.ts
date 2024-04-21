@@ -87,3 +87,33 @@ export async function generateTwoFactorToken(email: string) {
 
   return twoFactorToken;
 }
+
+export async function generateInvitationToken(email: string) {
+  const token = uuid();
+  // We set the expiration time to 1 hour from now
+  const expiresAt = new Date(new Date().getTime() + 3600 * 1000);
+
+  const existingToken = await db.invitationToken.findFirst({
+    where: {
+      email,
+    },
+  });
+
+  if (existingToken) {
+    await db.invitationToken.delete({
+      where: {
+        id: existingToken.id,
+      },
+    });
+  }
+
+  const invitationToken = await db.invitationToken.create({
+    data: {
+      email,
+      token,
+      expiresAt,
+    },
+  });
+
+  return invitationToken;
+}

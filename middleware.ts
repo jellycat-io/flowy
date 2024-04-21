@@ -1,16 +1,11 @@
-import NextAuth from 'next-auth';
-
-import authConfig from '@/auth.config';
-
+import { auth } from './auth';
 import {
-  DEFAULT_LOGIN_REDIRECT,
   Routes,
   apiAuthPrefix,
   authRoutes,
+  protectedRoutes,
   publicRoutes,
 } from './routes';
-
-const { auth } = NextAuth(authConfig);
 
 export default auth((req) => {
   const { nextUrl } = req;
@@ -18,26 +13,30 @@ export default auth((req) => {
   const isApiAuthRoute = nextUrl.pathname.startsWith(apiAuthPrefix);
   const isPublicRoute = publicRoutes.includes(nextUrl.pathname);
   const isAuthRoute = authRoutes.includes(nextUrl.pathname);
-
+  const isProtectedRoute = protectedRoutes.includes(nextUrl.pathname);
   if (isApiAuthRoute) return;
-
   if (isAuthRoute) {
     if (isLoggedIn) {
-      return Response.redirect(new URL(DEFAULT_LOGIN_REDIRECT, nextUrl));
+      try {
+        const redirectUrl = new URL(
+          `${Routes.org}/${req.auth?.user.activeOrgId}`,
+          nextUrl,
+        );
+        return Response.redirect(redirectUrl);
+      } catch (error) {
+        console.error('Failed to construct redirect URL:', error);
+        // Redirect to a default page or error page
+        return Response.redirect(new URL(Routes.auth.error, nextUrl));
+      }
     }
-
     return;
   }
-
   if (!isLoggedIn && !isPublicRoute) {
     let callbackUrl = nextUrl.pathname;
-
     if (nextUrl.search) {
       callbackUrl += nextUrl.search;
     }
-
     const encodedCallbackUrl = encodeURIComponent(callbackUrl);
-
     return Response.redirect(
       new URL(
         `${Routes.auth.login}?callbackUrl=${encodedCallbackUrl}`,
@@ -45,7 +44,6 @@ export default auth((req) => {
       ),
     );
   }
-
   return;
 });
 

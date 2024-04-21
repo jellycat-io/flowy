@@ -8,7 +8,8 @@ import React from 'react';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 
-import { login } from '@/actions/login';
+import { login } from '@/actions/auth/login';
+import { LoginSchema } from '@/actions/auth/schemas';
 import { CardWrapper } from '@/components/auth/card-wrapper';
 import { FormError } from '@/components/form-error';
 import { FormSuccess } from '@/components/form-success';
@@ -29,7 +30,6 @@ import {
   InputOTPSlot,
 } from '@/components/ui/input-otp';
 import { Routes } from '@/routes';
-import { LoginSchema } from '@/schemas';
 
 export function LoginForm() {
   const [error, setError] = React.useState<string | undefined>('');
@@ -84,7 +84,7 @@ export function LoginForm() {
       headerLabel='Welcome back'
       backButtonLabel="Don't have an account?"
       backButtonHref={Routes.auth.register}
-      showSocials={!showTwoFactor}
+      // showSocials={!showTwoFactor}
     >
       <Form {...form}>
         <form onSubmit={handleSubmit(onSubmit)} className='space-y-6'>

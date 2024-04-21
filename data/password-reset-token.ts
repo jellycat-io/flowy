@@ -5,7 +5,8 @@ export function getPasswordResetTokenByToken(token: string) {
     return db.passwordResetToken.findUnique({
       where: { token },
     });
-  } catch {
+  } catch (e) {
+    console.error('Error getting password reset token by token', e);
     return null;
   }
 }
@@ -15,7 +16,8 @@ export function getPasswordResetTokenByEmail(email: string) {
     return db.passwordResetToken.findFirst({
       where: { email },
     });
-  } catch {
+  } catch (e) {
+    console.error('Error getting password reset token by email', e);
     return null;
   }
 }

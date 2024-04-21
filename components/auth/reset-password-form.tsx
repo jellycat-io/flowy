@@ -7,7 +7,8 @@ import React from 'react';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 
-import { resetPassword } from '@/actions/reset-password';
+import { resetPassword } from '@/actions/auth/reset-password';
+import { ResetPasswordSchema } from '@/actions/auth/schemas';
 import { CardWrapper } from '@/components/auth/card-wrapper';
 import { FormError } from '@/components/form-error';
 import { FormSuccess } from '@/components/form-success';
@@ -22,7 +23,6 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Routes } from '@/routes';
-import { ResetPasswordSchema } from '@/schemas';
 
 export const ResetPasswordForm = () => {
   const [error, setError] = React.useState<string | undefined>('');

@@ -5,7 +5,8 @@ export async function getTwoFactorConfirmationByUserId(userId?: string) {
 
   try {
     return await db.twoFactorConfirmation.findFirst({ where: { userId } });
-  } catch {
+  } catch (e) {
+    console.error('Error getting two factor confirmation by user id', e);
     return null;
   }
 }

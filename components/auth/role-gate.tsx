@@ -3,20 +3,31 @@
 import { UserRole } from '@prisma/client';
 
 import { FormError } from '@/components/form-error';
-import { useCurrentRole } from '@/hooks/use-active-role';
+import { useActiveUser } from '@/hooks/use-active-user';
 
 interface RoleGateProps {
   children: React.ReactNode;
-  allowedRole: UserRole;
+  allowedRoles: UserRole[];
+  showUnauthorized?: boolean;
 }
 
-export function RoleGate({ children, allowedRole }: RoleGateProps) {
-  const role = useCurrentRole();
+export function RoleGate({
+  children,
+  allowedRoles,
+  showUnauthorized = false,
+}: RoleGateProps) {
+  const user = useActiveUser();
 
-  if (role !== allowedRole) {
-    return (
-      <FormError message='You do not have permission to view this page!' />
-    );
+  if (!user) {
+    return showUnauthorized ? (
+      <FormError message='You must be logged in to view this content!' />
+    ) : null;
+  }
+
+  if (!allowedRoles.includes(user.role)) {
+    return showUnauthorized ? (
+      <FormError message='You do not have permission to view this content!' />
+    ) : null;
   }
 
   return <>{children}</>;

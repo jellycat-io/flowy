@@ -1,14 +1,14 @@
 import { PrismaAdapter } from '@auth/prisma-adapter';
-import type { UserRole } from '@prisma/client';
+import { UserRole } from '@prisma/client';
 import NextAuth from 'next-auth';
 
 import authConfig from '@/auth.config';
 
 import { getAccountByUserId } from './data/account';
+import { getOrgRole } from './data/org';
 import { getTwoFactorConfirmationByUserId } from './data/two-factor-confirmation';
 import { getUserById } from './data/user';
 import { db } from './lib/db';
-import { Routes } from './routes';
 
 export const {
   handlers: { GET, POST },
@@ -17,22 +17,46 @@ export const {
   signOut,
 } = NextAuth({
   adapter: PrismaAdapter(db),
-  session: { strategy: 'jwt' },
-  pages: {
-    signIn: Routes.auth.login,
-    error: Routes.auth.error,
-  },
   events: {
     async linkAccount({ user }) {
-      await db.user.update({
-        where: { id: user.id },
-        data: { emailVerified: new Date() },
+      if (!user.id) return;
+
+      const orgExists = await db.organizationRole.findFirst({
+        where: { userId: user.id },
+        include: { org: true },
       });
+
+      if (!orgExists) {
+        const org = await db.organization.create({
+          data: {
+            name: `${user.name}'s Organization`,
+            users: {
+              create: {
+                userId: user.id,
+                role: UserRole.OWNER,
+              },
+            },
+          },
+        });
+
+        await db.user.update({
+          where: { id: user.id },
+          data: {
+            defaultOrgId: org.id,
+            activeOrgId: org.id,
+            emailVerified: new Date(),
+          },
+        });
+      } else {
+        await db.user.update({
+          where: { id: user.id },
+          data: { emailVerified: new Date() },
+        });
+      }
     },
   },
   callbacks: {
     async signIn({ user, account }) {
-      // Allow OAuth without email verification
       if (account?.provider !== 'credentials') return true;
 
       const existingUser = await getUserById(user.id);
@@ -62,14 +86,16 @@ export const {
           session.user.id = token.sub;
         }
 
-        if (token.role) {
-          session.user.role = token.role as UserRole;
-        }
+        const orgRole = await getOrgRole(
+          token.activeOrgId as string,
+          session.user.id,
+        );
 
-        session.user.firstname = token.firstname as string;
-        session.user.lastname = token.lastname as string;
+        session.user.role = orgRole?.role as UserRole;
+        session.user.name = token.name as string;
         session.user.username = token.username as string;
         session.user.email = token.email as string;
+        session.user.activeOrgId = token.activeOrgId as string;
         session.user.isOAuth = token.isOAuth as boolean;
         session.user.isTwoFactorEnabled = token.isTwoFactorEnabled as boolean;
       }
@@ -86,11 +112,10 @@ export const {
       const account = await getAccountByUserId(user.id);
 
       token.isOAuth = !!account;
-      token.firstname = user.firstname;
-      token.lastname = user.lastname;
+      token.name = user.name;
       token.username = user.username;
       token.email = user.email;
-      token.role = user.role;
+      token.activeOrgId = user.activeOrgId;
       token.isTwoFactorEnabled = user.isTwoFactorEnabled;
 
       return token;

@@ -18,6 +18,12 @@ export const authRoutes = [
 ];
 
 /**
+ * An array of routes that are protected and require authentication.
+ * @type {string[]}
+ */
+export const protectedRoutes = ['/org'];
+
+/**
  * The prefix for api authentication routes.
  * Routes that starts with this prefix are used for API authentication process.
  * @type {string}
@@ -25,15 +31,15 @@ export const authRoutes = [
 export const apiAuthPrefix = '/api/auth';
 
 /**
- * The default redirect path after a successful login.
- * @type {string}
+ * Routes for the application.
+ * @type {Object}
  */
-export const DEFAULT_LOGIN_REDIRECT = '/dashboard';
-
 export const Routes = {
+  org: '/org',
+  orgEdit: '/org/[orgId]/edit',
+  orgInvitation: '/org/invitation',
   landing: '/',
   auth: {
-    dashboard: '/dashboard',
     login: '/auth/login',
     register: '/auth/register',
     error: '/auth/error',
