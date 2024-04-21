@@ -1,11 +1,12 @@
+'use client';
+
 import { zodResolver } from '@hookform/resolvers/zod';
-import { LoaderCircle, Save } from 'lucide-react';
+import { LoaderCircle } from 'lucide-react';
 import React from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import { z } from 'zod';
 
-import { getUserOrgs } from '@/actions/org/get-user-orgs';
 import { deleteAccountAction } from '@/actions/settings/delete-account';
 import { UpdateAccountSchema } from '@/actions/settings/schemas';
 import { updateAccountAction } from '@/actions/settings/update-account';
@@ -24,8 +25,10 @@ import {
 import { Input } from '@/components/ui/input';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Switch } from '@/components/ui/switch';
+import { useOrgs } from '@/contexts/org-context';
+import { Org } from '@/data/org';
 import { useAction } from '@/hooks/use-action';
-import { useFetch } from '@/hooks/use-fetch';
+import { checkOwnerRole } from '@/lib/utils';
 import { ExtendedUser } from '@/next-auth';
 
 interface AccountFormProps {
@@ -34,6 +37,8 @@ interface AccountFormProps {
 }
 
 export function AccountForm({ user, onUpdateSuccess }: AccountFormProps) {
+  const { orgs, isLoading: isLoadingOrgs } = useOrgs();
+
   const form = useForm<z.infer<typeof UpdateAccountSchema>>({
     resolver: zodResolver(UpdateAccountSchema),
     defaultValues: {
@@ -85,13 +90,7 @@ export function AccountForm({ user, onUpdateSuccess }: AccountFormProps) {
     }
   }
 
-  const { data: userOrgs, loading: loadingUserOrgs } = useFetch(getUserOrgs, {
-    userId: user.id!,
-  });
-
-  const ownerOrgsNames = userOrgs
-    ?.filter((org) => org.role === 'OWNER')
-    ?.map((org) => org.name);
+  const ownerOrgs = orgs.filter((org: Org) => checkOwnerRole(org, user.id));
 
   return (
     <div className='space-y-6'>
@@ -184,22 +183,20 @@ export function AccountForm({ user, onUpdateSuccess }: AccountFormProps) {
           </div>
         </form>
       </Form>
-      {loadingUserOrgs ? (
+      {isLoadingOrgs ? (
         <DangerZoneSkeleton />
       ) : (
         <div className='text-sm'>
           <h2 className='text-xl text-destructive mb-2'>Danger zone</h2>
           <div className='flex flex-col space-y-4 items-start border border-destructive/50 p-4 rounded-sm'>
-            {ownerOrgsNames?.length ? (
+            {ownerOrgs?.length ? (
               <div className='space-y-1.5'>
                 <p>
                   You are the owner of the following organizations:{' '}
-                  {ownerOrgsNames.map((name, index) => (
-                    <span key={name}>
-                      <span className='font-medium'>{name}</span>
-                      <span>
-                        {index < ownerOrgsNames.length - 1 ? ', ' : ''}
-                      </span>
+                  {ownerOrgs.map((org, index) => (
+                    <span key={org.id}>
+                      <span className='font-medium'>{org.name}</span>
+                      <span>{index < ownerOrgs.length - 1 ? ', ' : ''}</span>
                     </span>
                   ))}
                   .
@@ -216,7 +213,7 @@ export function AccountForm({ user, onUpdateSuccess }: AccountFormProps) {
             </p>
             <Button
               variant='destructive'
-              disabled={!!ownerOrgsNames?.length}
+              disabled={!!ownerOrgs?.length}
               onClick={onDeleteAccount}
             >
               {deletingAccount && (

@@ -1,39 +1,20 @@
-import { UserRole } from '@prisma/client';
 import { DoorOpen, Pencil, Sparkles, Trash2 } from 'lucide-react';
 import Link from 'next/link';
 import React from 'react';
 import { toast } from 'sonner';
 
 import { deleteOrgAction } from '@/actions/org/delete-org';
-import { getUserOrgs } from '@/actions/org/get-user-orgs';
 import { ConfirmDialog } from '@/components/confirm-dialog';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useOrgs } from '@/contexts/org-context';
-import { Org } from '@/data/org';
 import { useAction } from '@/hooks/use-action';
-import { useFetch } from '@/hooks/use-fetch';
+import { checkAdminRole, checkOwnerRole } from '@/lib/utils';
 import { ExtendedUser } from '@/next-auth';
 
 interface OrgsManagerProps {
   user: ExtendedUser;
-}
-
-function checkAdminRole(org: Org, userId?: string) {
-  for (const user of org.users) {
-    if (user.userId === userId) {
-      return user.role === UserRole.ADMIN || user.role === UserRole.OWNER;
-    }
-  }
-}
-
-function checkOwnerRole(org: Org, userId?: string) {
-  for (const user of org.users) {
-    if (user.userId === userId) {
-      return user.role === UserRole.OWNER;
-    }
-  }
 }
 
 export function OrgsManager({ user }: OrgsManagerProps) {
@@ -121,5 +102,3 @@ export function OrgsManager({ user }: OrgsManagerProps) {
     </>
   );
 }
-
-const isAdmin = (role: string) => role === 'ADMIN' || role === 'OWNER';
